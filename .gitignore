@@ -1,0 +1,53 @@
+# Source data
+
+# Raw datasets should not be committed
+*.csv
+*.parquet
+*.json
+
+data/raw/
+data/_staging/
+
+# Environment / secrets
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+secrets/
+
+
+# Python
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+.venv/
+venv/
+env/
+
+# Testing
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+
+*.log
+logs/
+
+# Databricks / notebooks
+
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# IDE
+
+.vscode/
+.idea/
