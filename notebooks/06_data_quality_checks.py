@@ -780,6 +780,40 @@ print("   Flagged but missing:     {} (CRITICAL)".format(sched_flagged_status))
 
 # COMMAND ----------
 
+# DBTITLE 1,Section 6.4b Investigation — Hours Worked >24h Evidence
+# MAGIC %sql
+# MAGIC -- Section 6.4b Investigation: Evidence for DQ006_4b (Hours Worked >24h)
+# MAGIC -- This cell documents the investigation of 16 records where hours_worked > 24.
+# MAGIC -- Does NOT change the DQ006_4b FAIL/WARNING status or threshold.
+# MAGIC -- Provides evidence that these records are legitimate business cases.
+# MAGIC
+# MAGIC SELECT
+# MAGIC   CASE
+# MAGIC     WHEN pay_code IN ('Vacation TM', 'LOA - Un Paid TM')
+# MAGIC       THEN 'Likely payroll-valid leave block'
+# MAGIC     WHEN hours_worked = 24.50
+# MAGIC       AND pay_code = 'Hourly'
+# MAGIC       THEN 'Likely legitimate extended shift'
+# MAGIC     ELSE 'Manual review: exceptional long shift'
+# MAGIC   END AS investigation_classification,
+# MAGIC   COUNT(*) AS record_count,
+# MAGIC   MIN(hours_worked) AS min_hours_worked,
+# MAGIC   MAX(hours_worked) AS max_hours_worked
+# MAGIC FROM workforce.silver.timesheet
+# MAGIC WHERE hours_worked > 24
+# MAGIC GROUP BY
+# MAGIC   CASE
+# MAGIC     WHEN pay_code IN ('Vacation TM', 'LOA - Un Paid TM')
+# MAGIC       THEN 'Likely payroll-valid leave block'
+# MAGIC     WHEN hours_worked = 24.50
+# MAGIC       AND pay_code = 'Hourly'
+# MAGIC       THEN 'Likely legitimate extended shift'
+# MAGIC     ELSE 'Manual review: exceptional long shift'
+# MAGIC   END
+# MAGIC ORDER BY investigation_classification;
+
+# COMMAND ----------
+
 # DBTITLE 1,Section 7 — Referential Integrity
 # Section 7: Referential Integrity
 # Small employee master (50 rows) vs large timesheet population — unmatched expected.
