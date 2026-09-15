@@ -802,7 +802,7 @@ display(
 timesheet_work = (
     timesheet_work
     .filter(
-        F.col("hours_worked").isNull() |
+        F.col("hours_worked").isNotNull() &
         F.expr(
             "try_cast(hours_worked AS DECIMAL(10,2))"
         ).isNotNull()
@@ -1224,6 +1224,9 @@ print("Duplicate conflict validation PASSED")
 # COMMAND ----------
 
 # DBTITLE 1,duplicate
+if "source_duplicate_count" in timesheet_work.columns:
+    timesheet_work = timesheet_work.drop("source_duplicate_count")
+
 duplicate_count_df = (
     timesheet_work
     .groupBy(*natural_key_columns)
