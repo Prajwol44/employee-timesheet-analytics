@@ -1,4 +1,6 @@
 # Employee Timesheet Analytics
+#### Author: Prajwol Regmi
+#### Project created as a part of selection process for Lepfrog Tech
 
 ## Explaining the Project
 
