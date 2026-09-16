@@ -51,3 +51,6 @@ logs/
 
 .vscode/
 .idea/
+
+api/.venv/
+api/.env
