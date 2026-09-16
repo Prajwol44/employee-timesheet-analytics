@@ -1,0 +1,49 @@
+resources:
+  jobs:
+    employee_timesheet_etl:
+      name: employee_timesheet_etl
+      tasks:
+        - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/01_bronze_ingestion
+            source: WORKSPACE
+        - task_key: silver_employee
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/02_silver_employee
+            source: WORKSPACE
+        - task_key: silver_timesheet
+          depends_on:
+            - task_key: silver_employee
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/03_silver_timesheet
+            source: WORKSPACE
+        - task_key: gold_workforce_analytics
+          depends_on:
+            - task_key: silver_timesheet
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/04_gold_workforce_analytics
+            source: WORKSPACE
+        - task_key: gold_attendance_analytics
+          depends_on:
+            - task_key: gold_workforce_analytics
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/05_gold_attendance_analytics
+            source: WORKSPACE
+        - task_key: data_quality_checks
+          depends_on:
+            - task_key: gold_attendance_analytics
+            - task_key: gold_workforce_analytics
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/06_data_quality_checks
+            source: WORKSPACE
+        - task_key: sql_analytics
+          depends_on:
+            - task_key: gold_workforce_analytics
+          notebook_task:
+            notebook_path: /Workspace/Users/prajwolregmi44@gmail.com/employee-timesheet-analytics/notebooks/07_sql_analytics
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED

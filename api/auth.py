@@ -10,10 +10,10 @@ Log in via POST /login to get a token, then send it back as
 import os
 from datetime import datetime, timedelta, timezone
 
-import bcrypt
-import jwt
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import bcrypt # type: ignore
+import jwt # type: ignore
+from fastapi import Depends, HTTPException # type: ignore
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer # type: ignore
 
 # Set AUTH_SECRET_KEY in the environment for anything beyond local dev.
 # The fallback below is 32+ bytes only to satisfy HS256's minimum key

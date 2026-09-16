@@ -1,11 +1,17 @@
 # Source data
 
-# Raw datasets should not be committed
+# Raw datasets should not be committed, except the small Bronze/Silver
+# exports needed to actually run this project (see README).
 *.csv
 *.parquet
 *.json
 
-data/
+!data/bronze/employee.csv
+!data/silver/employee.csv
+!data/silver/pay_code_dimension.csv
+!data/silver/timesheet_pay_code.csv
+
+data/gold/
 
 # Environment / secrets
 

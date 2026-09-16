@@ -71,7 +71,9 @@ def load_employees(session):
 
 
 def load_timesheets(session):
-    df = pd.read_csv(DATA_DIR / "timesheet.csv", dtype=TIMESHEET_ID_COLUMNS)
+    # .gz because the raw CSV is ~166MB, over GitHub's 100MB file limit.
+    # pandas decompresses on the fly based on the extension.
+    df = pd.read_csv(DATA_DIR / "timesheet.csv.gz", dtype=TIMESHEET_ID_COLUMNS)
     columns = [c.name for c in Timesheet.__table__.columns]
     df = _prepare(df[columns], TIMESHEET_DATE_COLUMNS + TIMESHEET_DATETIME_COLUMNS)
 
