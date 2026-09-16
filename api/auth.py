@@ -7,6 +7,7 @@ Log in via POST /login to get a token, then send it back as
 "Authorization: Bearer <token>" on every other request.
 """
 
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -14,6 +15,8 @@ import bcrypt # type: ignore
 import jwt # type: ignore
 from fastapi import Depends, HTTPException # type: ignore
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer # type: ignore
+
+logger = logging.getLogger(__name__)
 
 # Set AUTH_SECRET_KEY in the environment for anything beyond local dev.
 # The fallback below is 32+ bytes only to satisfy HS256's minimum key
@@ -42,7 +45,9 @@ def authenticate(username: str, password: str) -> str | None:
     """Returns the user's role if the password is correct, else None."""
     user = USERS.get(username)
     if not user or not bcrypt.checkpw(password.encode(), user["password_hash"]):
+        logger.warning("Failed login attempt for username=%s", username)
         return None
+    logger.info("Successful login for username=%s role=%s", username, user["role"])
     return user["role"]
 
 

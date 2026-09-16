@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 
 from fastapi import Depends, FastAPI, HTTPException, Query
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 from auth import authenticate, create_access_token, get_current_user, require_admin
 from db.models import Employee, Timesheet
 from db.session import get_db
+from logging_config import setup_logging
 from schemas import (
     EmployeeCreate,
     EmployeeOut,
@@ -14,6 +16,9 @@ from schemas import (
     TimesheetOut,
     TokenResponse,
 )
+
+setup_logging("api")
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Employee Timesheet Analytics API",
@@ -47,6 +52,7 @@ def create_employee(employee: EmployeeCreate, db: Session = Depends(get_db)):
     db.add(db_employee)
     db.commit()
     db.refresh(db_employee)
+    logger.info("Employee created: %s", db_employee.client_employee_id)
     return db_employee
 
 
@@ -86,6 +92,7 @@ def update_employee(
         setattr(employee, field, value)
     db.commit()
     db.refresh(employee)
+    logger.info("Employee updated: %s", employee_id)
     return employee
 
 
@@ -100,6 +107,7 @@ def delete_employee(employee_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Employee not found")
     db.delete(employee)
     db.commit()
+    logger.info("Employee deleted: %s", employee_id)
 
 
 def _filter_by_date(query, start_date: date | None, end_date: date | None):

@@ -9,14 +9,18 @@ Usage (from the api/ directory):
     python -m db.load_data
 """
 
+import logging
 import os
 from pathlib import Path
 
-import pandas as pd
-from sqlalchemy import delete, insert
+import pandas as pd # type: ignore
+from sqlalchemy import delete, insert # type: ignore
 
 from db.models import Employee, Timesheet
 from db.session import SessionLocal, init_db
+from logging_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "silver"
 
@@ -88,34 +92,47 @@ def _prepare(df, date_columns):
 
 
 def load_employees(session):
-    df = _read_csv("employee.csv", dtype=EMPLOYEE_ID_COLUMNS)
+    logger.info("Loading employees from %s", "S3" if DATA_SOURCE == "s3" else DATA_DIR)
+    try:
+        df = _read_csv("employee.csv", dtype=EMPLOYEE_ID_COLUMNS)
+    except FileNotFoundError:
+        logger.error("employee.csv not found (DATA_SOURCE=%s)", DATA_SOURCE)
+        raise
+
     columns = [c.name for c in Employee.__table__.columns]
     df = _prepare(df[columns], EMPLOYEE_DATE_COLUMNS)
 
     session.execute(delete(Employee))
     session.execute(insert(Employee), df.to_dict(orient="records"))
-    print(f"Loaded {len(df)} employees")
+    logger.info("Loaded %d employees", len(df))
 
 
 def load_timesheets(session):
-    # .gz because the raw CSV is ~166MB, over GitHub's 100MB file limit.
-    # pandas decompresses on the fly based on the extension.
-    df = _read_csv("timesheet.csv.gz", dtype=TIMESHEET_ID_COLUMNS)
+    logger.info("Loading timesheets from %s", "S3" if DATA_SOURCE == "s3" else DATA_DIR)
+    try:
+        # .gz because the raw CSV is ~166MB, over GitHub's 100MB file limit.
+        # pandas decompresses on the fly based on the extension.
+        df = _read_csv("timesheet.csv.gz", dtype=TIMESHEET_ID_COLUMNS)
+    except FileNotFoundError:
+        logger.error("timesheet.csv.gz not found (DATA_SOURCE=%s)", DATA_SOURCE)
+        raise
+
     columns = [c.name for c in Timesheet.__table__.columns]
     df = _prepare(df[columns], TIMESHEET_DATE_COLUMNS + TIMESHEET_DATETIME_COLUMNS)
 
     session.execute(delete(Timesheet))
     session.execute(insert(Timesheet), df.to_dict(orient="records"))
-    print(f"Loaded {len(df)} timesheet rows")
+    logger.info("Loaded %d timesheet rows", len(df))
 
 
 def main():
+    setup_logging("etl")
     init_db()
     with SessionLocal() as session:
         load_employees(session)
         load_timesheets(session)
         session.commit()
-    print("Done.")
+    logger.info("Done.")
 
 
 if __name__ == "__main__":
