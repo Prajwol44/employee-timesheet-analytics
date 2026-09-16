@@ -5,8 +5,7 @@
 *.parquet
 *.json
 
-data/raw/
-data/_staging/
+data/
 
 # Environment / secrets
 
@@ -28,6 +27,8 @@ __pycache__/
 .venv/
 venv/
 env/
+
+*.db
 
 # Testing
 
